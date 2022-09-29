@@ -1,0 +1,50 @@
+\documentclass[12pt]{Homework}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{setspace}
+
+\title{\footnotesize\textsc{ECS 272 - Reading Assignment 1}}
+\author{\textbf{Yuya Kawakami}}
+
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+
+\begin{document}
+
+\problem{1.1}
+What can you use visualization tools for?  Provide 2-3 usages.
+\solution{}
+\begin{itemize}
+    \item Render scientific data to communicate the dynamics of the simulation data to domain scientists.
+    \item Render election data to citizens to highlight key races and results.
+    \item Render aircraft parameters to pilots to ensure a safe flight.
+\end{itemize}
+    
+\problem{1.2}
+What are the limitations of statistical characterizations of data?
+\solution{}
+As Anscombe's Quartet shows, quantitative summaries of data can be misleading. Data with identical mean, variance, and correlation can arise from completely different relationships.
+
+\problem{1.3}
+Why interaction is crucial to effective visualization?
+\solution{}
+Static graphics like that on newspapers can only show one image and lacks the ability to adapt to the users inputs. Interactivity brings about a way to drastically increase the number of visual encodings in one vis system.
+
+\problem{2.1}
+Explain the equation, $\frac{dK}{dt}=P(V(D,S,t), K)$, which appeared in Section 4.4 of the paper.
+\solution{}
+In the notation that the author uses, $K$ represents the current knowledge of the user, $t$ the time, $P$ the perceptual and cognitive ability of the user, $D$ the data, and $S$ the specification of the hardware.
+Taken literally, the equation attempts to describe that the rate of change of \textit{knowledge} with respect to time is a function of all $P,V,D,S,t$ and $K$ itself. In other words, visualization itself is a subjective tool - the amount of influence, or `usefulness' (for the lack of a better word) is highly dependent on other factors beyond just the visualization system itself.
+
+\problem{2.2}
+While the main use cases for visualization are presentation and exploration, which one is more important? In addition to the author's comments in this paper, what is your opinion?
+\solution{}
+The author claims that presentation is more important than exploration, though the distinction drawn between the two by the author is, in my opinion, quite vague. Certainly, one can be exploring data with some prior information about the data, and one can be presented data without any prior information. The distinction that I would draw between the two is whether it's an active process on the user's part or not. Exploration, intuitively, is an active activity, while its counterpart
+seems more passive. Visualization in its purest sense should be passive, in my opinion, so I would also learn towards presentation in terms of importance. As the author notes, a visualization that leaves a lot of work to the users to extract insight is poorly designed.
+
+
+\end{document}
+
