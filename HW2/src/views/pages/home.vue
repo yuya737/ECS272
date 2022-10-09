@@ -1,7 +1,16 @@
 <template>
     <div>
-        <h1>Welcome Home</h1>
-        <BarChart v-if="dataExists" :myData="myData" />
+        <a-row :gutter="[16,16]">
+        <a-col :span="12"/>
+        <a-col :span="12"/>
+        </a-row>
+
+        <a-row :gutter="[16,16]">
+        <a-col :span="12"/>
+        <a-col :span="12">
+            <BarChart v-if="dataExists" :myData="myData" />
+        </a-col>
+        </a-row>
     </div>
 </template>
 

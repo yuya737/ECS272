@@ -8,7 +8,6 @@
 import * as THREE from 'three';
 import { OrbitControls  } from 'three/addons/controls/OrbitControls.js';
 import * as d3 from "d3";
-import { MeshLine, MeshLineMaterial, MeshLineRaycast  } from 'three.meshline';
 import { LineMaterial  } from "three/examples/jsm/lines/LineMaterial";
 import { LineGeometry  } from "three/examples/jsm/lines/LineGeometry";
 import { Line2  } from "three/examples/jsm/lines/Line2";
@@ -23,6 +22,8 @@ const pitch_type = {
     'CH': 0x386cb0
 }
 
+let curves_bool_array;
+
 class bezierPath {
 
     constructor (config={}) {  
@@ -34,12 +35,14 @@ class bezierPath {
             v3, 
             frequency = 1, 
             frameRate = 60, 
-            height, 
-            color = 0xffffff
+            height,
+            pitch_speed,
+            color = 0xffffff,
         } = config;
 
         //https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
         this.frameRate = frameRate;       
+        this.pitch_speed = pitch_speed;
 
         this.parent = parent;
         this.curveGroup = new THREE.Group();
@@ -57,48 +60,11 @@ class bezierPath {
         const numPoints =  Math.max(Math.floor((frameRate / 2) * frequency),15);
 
         const points = curve.getPoints(numPoints);
-        //'FF', 'CU', 'FC', 'SI', 'CH'
 
-
-        /* const material = new THREE.LineBasicMaterial( */
-        /*     {  linewidth: 5.0, */
-        /*         color: color */ 
-        /*     }  ); */ 
-        
-        /* const material = new MeshLineMaterial({ */
-        /*     color: color, */
-        /*     lineWidth: 10.0} */
-        /* ); */
         const material = new LineMaterial({
-                  color: color,
-                  linewidth: 0.003,
+            color: color,
+            linewidth: 0.003,
         });
-        /* debugger; */
-
-        /* for (let i = 0; i < points.length - 1; i++) { */
-        /*     const geometry =  new THREE.BufferGeometry().setFromPoints( [ points[i], points[i + 1]  ]  ); */ 
-        /*     const curveSegment = new THREE.Line( geometry, material ); */
-        /*     this.curveGroup.add(curveSegment); */
-
-        /* }  // for */
-
-        /* const pts = [] */
-        /* for (const point of points){ */
-        /*     pts.push(point.x, point.y, point.z); */
-        /* } */
-
-        /* const clrs = [] */
-        /* for (const point of points){ */
-        /*     clrs.push(255, 0, 0); */
-        /* } */
-        /* const geometry = new LineGeometry(); */
-        /* geometry.setPositions(pts); */
-        /* geometry.setColors(clrs); */
-
-        /* const line = new Line2(geometry, material); */
-        /* line.computeLineDistances(); */
-        /* parent.add(line); */
-
         for (let i = 0; i < points.length - 1; i++) {
             const pts = []
             pts.push(points[i].x, points[i].y, points[i].z);
@@ -127,14 +93,16 @@ class bezierPath {
 
     animate(){
 
-        let start;
+        let start, original_start;
         let currentSegment = this.currentSegment;
         let curveGroup = this.curveGroup;
         const framRate = this.frameRate;
+        const pitch_speed = this.pitch_speed;
+        const parent = this.parent;
 
         this.hide();
         curveGroup.visible = true;
-
+        /* window.requestAnimationFrame(step); */ 
         this.animationFrame = window.requestAnimationFrame(step); 
         let animationFrame = this.animationFrame;
 
@@ -142,26 +110,42 @@ class bezierPath {
 
             if (start === undefined) 
                 start = timestamp;
+            if (original_start === undefined)
+                original_start = timestamp;
+
+            const elapsed_from_original = timestamp - original_start;
+            /* console.log(elapsed_from_original); */
             const elapsed = timestamp - start;
 
-            if (elapsed >= (2000 / framRate) && curveGroup.visible ) {
-                currentSegment = 
-                    currentSegment < curveGroup.children.length - 1  ? ++currentSegment : 0;
-                curveGroup.children[currentSegment].visible = 
-                    !curveGroup.children[currentSegment].visible;
-                start = timestamp; 
-
+            let curveDone = true;
+            curveGroup.traverse( curveSegment =>  {curveDone = curveDone && curveSegment.visible; })
+            if (curveDone){
+                if (elapsed_from_original >= 2700){
+                    curveGroup.traverse( curveSegment => curveSegment.visible = false  );
+                    original_start = timestamp;
+                    currentSegment = -1; 
+                    curveGroup.visible = true;
+                }
+                console.log(elapsed_from_original);
             }
 
-            if (curveGroup.visible) 
-                animationFrame = window.requestAnimationFrame(step);  
+            const framHelper = 2500 - (1000/60)*(pitch_speed - 50);
+            if (elapsed >= (framHelper / framRate) && curveGroup.visible ) {
+                /* currentSegment = ++currentSegment; */
 
+                /* if (currentSegment === curveGroup.children.length){ */
+                /*     return; */
+                /* } */
+                currentSegment < curveGroup.children.length - 1  ? ++currentSegment : 0;
 
+                curveGroup.children[currentSegment].visible = true;
+                /* !curveGroup.children[currentSegment].visible; */
+                start = timestamp; 
+            }
+
+            /* if (curveGroup.visible) */ 
+            animationFrame = window.requestAnimationFrame(step);  
         }
-
-
-
-
     } //animate  
 
     destroy() {
@@ -224,7 +208,7 @@ export default {
         this.camera = this.setupCamera();
         console.log(this);
         this.temp();
-        this.drawPaths();
+        this.path = this.getPaths();
         this.animate();
     },
     methods: {
@@ -238,33 +222,36 @@ export default {
             renderer.setPixelRatio(window.devicePixelRatio);
 
             this.renderer = renderer;
-            this.controls = controls;
+            /* this.controls = controls; */
 
-            let geometry = new THREE.BoxGeometry(1,1,1);
-            const material = new THREE.MeshNormalMaterial();
+            /* let geometry = new THREE.BoxGeometry(1,1,1); */
+            /* const material = new THREE.MeshNormalMaterial(); */
 
-            this.mesh = new THREE.Mesh(geometry, material) 
+            /* this.mesh = new THREE.Mesh(geometry, material) */ 
             this.scene.add(this.mesh);
             console.log(this.scene)
             container.appendChild(this.renderer.domElement);
-            
+
             this.renderer.render(this.scene, this.camera);
 
         }, // while
         animate() {
+            /* for (const p of this.path){ */
+            /*     p['animate']() */
+            /* } */
 
             requestAnimationFrame(this.animate);
             /* this.randomPath.animate(); */
 
-            this.mesh.rotation.x += 0.01
-            this.mesh.rotation.y += 0.01
+            /* this.mesh.rotation.x += 0.01 */
+            /* this.mesh.rotation.y += 0.01 */
 
             this.renderer.render(this.scene, this.camera);
         },
 
-        drawPaths(){
+        getPaths(){
+            let arr = []
             for (let path of this.myData){
-                console.log(path);
                 const p = new bezierPath({
                     parent: this.scene,
                     v1: new THREE.Vector3(
@@ -280,10 +267,13 @@ export default {
                         path['pz'] - 5,
                         25),
                     height: 1,
-                    color: pitch_type[path['pitch_type']]
+                    color: pitch_type[path['pitch_type']],
+                    pitch_speed: path['start_speed'],
                 });
-                    p['animate']();
-                }
+                arr.push(p);
+                p['animate']();
+            }
+            return arr;
         },
 
         /* getRandomPath(){ */
