@@ -218,7 +218,7 @@ export default {
 
             const controls = new OrbitControls(this.camera, renderer.domElement);
 
-            renderer.setSize(Math.min(window.innerWidth, window.innerHeight), Math.min(window.innerWidth, window.innerHeight));
+            renderer.setSize(Math.min(container.clientWidth, container.clientHeight), Math.min(container.clientWidth, container.clientHeight));
             renderer.setPixelRatio(window.devicePixelRatio);
 
             this.renderer = renderer;
@@ -228,7 +228,7 @@ export default {
             /* const material = new THREE.MeshNormalMaterial(); */
 
             /* this.mesh = new THREE.Mesh(geometry, material) */ 
-            this.scene.add(this.mesh);
+            /* this.scene.add(this.mesh); */
             console.log(this.scene)
             container.appendChild(this.renderer.domElement);
 

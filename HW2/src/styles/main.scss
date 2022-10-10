@@ -10,6 +10,16 @@ html {
   color: $font-color;
 }
 
+body{
+  height: 100%;
+  width: 100%;
+}
+
+.home{
+  height: 100%;
+  width: 100%;
+}
+
 #root{
   height: 100%;
   width: 100%;
@@ -21,6 +31,6 @@ html {
 }
 
 #scene{
-  height: 20%;
-  width: 20%;
+  height: 100%;
+  width: 100%;
 }

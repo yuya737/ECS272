@@ -1,17 +1,15 @@
 <template>
-    <div>
-        <a-row :gutter="[16,16]">
-        <a-col :span="12"/>
-        <a-col :span="12"/>
+    <body>
+        <a-row :style="{ height: '100%' }">
+                <a-col :span="16" :style="{ height: '100%' }">
+                    <a-row :style="{ height: '50%' }"/>  
+                    <a-row :style="{ height: '50%' }"/>  
+                </a-col>
+                <a-col :span="8" :style="{ height: '100%' }" >
+                    <BarChart v-if="dataExists" :myData="myData" />
+                </a-col>
         </a-row>
-
-        <a-row :gutter="[16,16]">
-        <a-col :span="12"/>
-        <a-col :span="12">
-            <BarChart v-if="dataExists" :myData="myData" />
-        </a-col>
-        </a-row>
-    </div>
+    </body>
 </template>
 
 <script>
