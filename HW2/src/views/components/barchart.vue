@@ -17,9 +17,11 @@ const pitch_type = {
 
     'FF': 0x7fc97f,
     'CU': 0xbeaed4,
-    'FC': 0xfdc086,
     'SI': 0xffff99,
-    'CH': 0x386cb0
+    'CH': 0x386cb0,
+    'SL': 0xfdc086,
+    'FS': 0xf0027f
+
 }
 
 let curves_bool_array;
@@ -200,7 +202,7 @@ export default {
         /* let localData = testData['data']; */
         /* this.drawBarChart(localData, "#bar"); */
         // this.drawBarChart(this.myBarchartData, "#bar")
-        console.log("Data Passed down as a Prop  ", this.myData);
+        console.log("BarChart: Data Passed down as a Prop  ", this.myData);
         this.scene = this.setupScene();
         /* this.scene = new THREE.Scene(); */
         /* this.scene = new THREE.Scene(); */
@@ -346,15 +348,15 @@ export default {
             /* const height = 300; */
             const aspect = this.width / this.height;
 
-            const near = 1;
+            const near = 3;
             const sceneHeight = 1;
             const far = Math.max(10000,this.boundingBox.geometry.boundingSphere.radius * 2);
-            const camera = new THREE.PerspectiveCamera(60, 1., near, far);
+            const camera = new THREE.PerspectiveCamera(75, 1., near, far);
 
             // Position for a bird's eye view of the warehouse
             camera.position.set(this.boundingBox.geometry.boundingSphere.center.x, 
-                this.boundingBox.geometry.boundingSphere.radius , 
-                this.boundingBox.geometry.boundingSphere.radius * 1.5); 
+                this.boundingBox.geometry.boundingSphere.radius / 4 , 
+                this.boundingBox.geometry.boundingSphere.radius * 1.5 ); 
 
 
             camera.lookAt(this.boundingBox.geometry.boundingSphere.center.x,

@@ -1,12 +1,16 @@
 <template>
     <body>
         <a-row :style="{ height: '100%' }">
-                <a-col :span="16" :style="{ height: '100%' }">
-                    <a-row :style="{ height: '50%' }"/>  
-                    <a-row :style="{ height: '50%' }"/>  
+                <a-col :span="14" :style="{ height: '100%' }">
+                    <a-row :style="{ height: '50%', width: '100%' }"> 
+                        <a-col :style="{ width: '100%' }">
+                            <PitchChart v-if="dataExists" :myData="myData" />
+                        </a-col>
+                    </a-row>
+                    <a-row :style="{ height: '50%', width: '100%' }"/> 
                 </a-col>
-                <a-col :span="8" :style="{ height: '100%' }" >
-                    <BarChart v-if="dataExists" :myData="myData" />
+                <a-col :span="10" :style="{ height: '100%' }" >
+                            <BarChart v-if="dataExists" :myData="myData" />
                 </a-col>
         </a-row>
     </body>
@@ -14,6 +18,7 @@
 
 <script>
 import BarChart from "../components/barchart.vue"
+import PitchChart from "../components/pitchchart.vue"
 import * as d3 from "d3";
 /* import csvPath from '../../assets/data/SF_Historical_Ballot_Measures.csv'; */
 import csvPath from './test.csv';
@@ -26,7 +31,8 @@ export default {
         }
     },
     components: {
-        BarChart
+        BarChart,
+        PitchChart
     },
     created(){
         /* Fetch via CSV */
