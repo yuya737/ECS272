@@ -78,7 +78,7 @@ module.exports = {
             },
             // Images
             {
-                test: /\.(?:ico|gif|png|jpg|jpeg)$/i,
+                test: /\.(?:ico|gif|obj|png|jpg|jpeg)$/i,
                 type: 'asset/resource',
             },
             // Fonts and SVGs
@@ -95,6 +95,14 @@ module.exports = {
                 test: /\.(graphql|gql)$/,
                 exclude: /node_modules/,
                 loader: 'graphql-tag/loader',
+            },
+            {
+                test: /\.obj$/,
+                loader: 'webpack-obj-loader'
+            },
+            {
+                test: /\.gltf$/,
+                loader: 'gltf-webpack-loader'
             },
             {
                 test: /\.(txt|csv|mmdb)$/,

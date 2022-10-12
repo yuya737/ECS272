@@ -24,12 +24,15 @@
     "core-js": "^3.18.1",
     "d3": "^6.6.2",
     "d3-3d": "^0.1.2",
+    "gltf-webpack-loader": "^1.0.6",
     "pinia": "^2.0.13",
     "stats.js": "^0.17.0",
     "three.meshline": "^1.4.0",
     "util": "^0.12.4",
     "vue": "^3.2.31",
-    "vue-router": "^4.1.1"
+    "vue-router": "^4.1.1",
+    "webgl-obj-loader": "^2.0.8",
+    "webpack-obj-loader": "^1.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.15.5",
