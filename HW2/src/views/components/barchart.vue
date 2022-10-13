@@ -218,73 +218,56 @@ export default {
         // this.drawBarChart(this.myBarchartData, "#bar")
         console.log("BarChart: Data Passed down as a Prop  ", this.myData);
         this.scene = this.setupScene();
+        this.makeStrikeZone();
         /* this.scene = new THREE.Scene(); */
         /* this.scene = new THREE.Scene(); */
         /* this.boundingBox = this.setupBoundingBox(); */
         this.camera = this.setupCamera();
-        console.log(this);
-        this.addHomePlate();
         this.temp();
         this.path = this.getPaths();
         this.addLegend();
         this.animate();
     },
     methods: {
-        addHomePlate(){
-            const loader = new OBJLoader();
-            let homeplate = loader.parse(homeplateData);
-            this.scene.add(homeplate);
-            const light = new THREE.PointLight()
-            light.position.set(2.5, 7.5, 15)
-            this.scene.add(light)
-
-            /* debugger; */
-            // load a resource
-            /* let obj = [] */
-            /* loader.load( */
-            /*     homeplateData, */
-            /*     // resource URL */
-            /*     /1* '../../assets/data/homeplate2.sv', *1/ */
-            /*     // called when resource is loaded */
-            /*     function ( object  ) { */
-            /*         debugger; */
-            /*         obj.push(object); */
-            /*     }, */
-            /*     // called when loading is in progresses */
-            /*     function ( xhr  ) { */
-            /*         console.log( ( xhr.loaded / xhr.total * 100  ) + '% loaded'  ); */
-            /*     }, */
-            /*     // called when loading has errors */
-            /*     function ( error  ) { */
-            /*         console.log( 'An error happened'  ); */
-            /*     } */
-            /* ) */
-            /* debugger; */
-        },
-
         makeStrikeZone(){
             // Strike zone 
             let top = [], bot = [];
 
-            data.forEach(x => top.push(x['sz_top']));
-            data.forEach(x => bot.push(x['sz_bot']));
+            this.myData.forEach(x => top.push(x['sz_top']));
+            this.myData.forEach(x => bot.push(x['sz_bot']));
 
             top = top.reduce((a,b) => parseFloat(a) + parseFloat(b)) / top.length;
             bot = bot.reduce((a,b) => parseFloat(a) + parseFloat(b)) / bot.length;
 
-            /* const pts = [(-17/24),] */
+            const points = [   
+                [(-17/24), top-5, 50],
+                [(-17/24), bot-5, 50],
+                [(17/24), bot-5, 50],
+                [(17/24), top-5, 50],
+                [(-17/24), top-5, 50],
+            ];
+            const material = new LineMaterial({
+                color: 0x000000,
+                linewidth: 0.003,
+            });
 
-            const clrs = []
-            clrs.push(255, 0, 0);
-            clrs.push(255, 0, 0);
+            for (let i = 0; i < points.length - 1; i++){
+                const pts = []
+                pts.push(points[i][0], points[i][1], points[i][2]);
+                pts.push(points[i+1][0], points[i+1][1], points[i+1][2]);
 
-            const geometry = new LineGeometry();
-            geometry.setPositions(pts);
-            geometry.setColors(clrs);
+                const clrs = []
+                clrs.push(255, 0, 0);
+                clrs.push(255, 0, 0);
 
-            const line = new Line2(geometry, material);
-            line.computeLineDistances();
+                const geometry = new LineGeometry();
+                geometry.setPositions(pts);
+                geometry.setColors(clrs);
 
+                const line = new Line2(geometry, material);
+                line.computeLineDistances();
+                this.scene.add(line);
+            }
         },
         addLegend(){
             let container = document.getElementById('scene');
@@ -354,6 +337,7 @@ export default {
             let renderer = new THREE.WebGLRenderer({antialias: true});
 
             const controls = new OrbitControls(this.camera, renderer.domElement);
+            controls.maxPolarAngle = 3*Math.PI/4;
 
             /* renderer.setSize(Math.min(container.clientWidth, container.clientHeight), Math.min(container.clientWidth, container.clientHeight)); */
             renderer.setSize(container.clientWidth, container.clientHeight);
@@ -369,7 +353,6 @@ export default {
 
             /* this.mesh = new THREE.Mesh(geometry, material) */ 
             /* this.scene.add(this.mesh); */
-            console.log(this.scene)
             container.appendChild(this.renderer.domElement);
 
             this.renderer.render(this.scene, this.camera);
@@ -399,7 +382,7 @@ export default {
                     v1: new THREE.Vector3(
                         path['x0'],
                         path['z0'] - 5,
-                        -25),
+                        -50),
                     v2: new THREE.Vector3(
                         path['xmid'],
                         path['zmid'] - 5,
@@ -407,7 +390,7 @@ export default {
                     v3: new THREE.Vector3(
                         path['px'],
                         path['pz'] - 5,
-                        25),
+                        50),
                     height: 1,
                     color: pitch_type[path['pitch_type']],
                     pitch_speed: path['start_speed'],
@@ -457,7 +440,7 @@ export default {
             const sceneHeight = 1;
             //Cube is used temporarily to set size of boundingBox       
             /* const geometry = new THREE.BoxGeometry(1, sceneHeight, 1); */
-            const geometry = new THREE.BoxGeometry(10, 10, 50);
+            const geometry = new THREE.BoxGeometry(10, 10, 100);
             /* geometry.translate(0, sceneHeight / 2, 0); */
             const cube =  new THREE.Mesh(geometry, new THREE.MeshBasicMaterial()); 
 
@@ -481,7 +464,7 @@ export default {
             /* scene.add(helper); */
             /* helper.scale.addScaledVector(5,1); */
 
-            const geometry_plane = new THREE.PlaneGeometry( 100, 100 );
+            const geometry_plane = new THREE.PlaneGeometry( 1000, 1000 );
             /* debugger; */
             /* debugger; */
             const material_plane = new THREE.MeshBasicMaterial( {color: 0xb38650, side: THREE.DoubleSide, transparent: true, opacity: 0.5}  );
@@ -503,12 +486,12 @@ export default {
             const loader2 = new GLTFLoader();
 
             loader2.load(homeplateData2, 
-   (o)=>{let temp = o.scene.children[0]; temp.material = new THREE.MeshBasicMaterial ( {color: 0xFEEBC3} ); temp.rotation.x = -1 * Math.PI / 2; temp.position.y = -7; temp.position.z=25; temp.scale.set(1/9, 1/9, 1/9); scene.add(temp)},
+                (o)=>{let temp = o.scene.children[0]; temp.material = new THREE.MeshBasicMaterial ( {color: 0xFFFFFF} ); temp.rotation.x = -1 * Math.PI / 2; temp.position.y = -7; temp.position.z=50; temp.scale.set(1/9, 1/9, 1/9); scene.add(temp)},
                 (xhr)=>console.log((xhr.loaded / xhr.total) * 100+'% loaded'),
                 (e) => console.log(e));
 
             /* let homeplate = loader.parse(homeplateData); */
-            
+
 
             return scene;  
         },
@@ -525,14 +508,16 @@ export default {
             const camera = new THREE.PerspectiveCamera(75, 1., near, far);
 
             // Position for a bird's eye view of the warehouse
-            camera.position.set(-1 * this.boundingBox.geometry.boundingSphere.radius * 0.75, 
-                0,0);
+            /* camera.position.set(-1 * this.boundingBox.geometry.boundingSphere.radius * 0.75, */ 
+            /*     -6,0); */
             /* this.boundingBox.geometry.boundingSphere.radius / 4 , */ 
             /* this.boundingBox.geometry.boundingSphere.radius * 1.5 ); */ 
+            camera.position.set(0, -3, 60);
 
 
             camera.lookAt(this.boundingBox.geometry.boundingSphere.center.x,
-                this.boundingBox.geometry.boundingSphere.center.y,
+                /* this.boundingBox.geometry.boundingSphere.center.y, */
+                -7,
                 this.boundingBox.geometry.boundingSphere.center.z);    
 
             return camera;
