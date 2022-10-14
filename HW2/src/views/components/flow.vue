@@ -1,4 +1,5 @@
 <template>
+    <info>Title</info>
     <div id="chart2"></div>
 </template>
 
@@ -37,15 +38,15 @@ function SankeyChart({
     linkPath = d3Sankey.sankeyLinkHorizontal(), // given d in (computed) links, returns the SVG path
     linkTitle = d => `${d.source.id} → ${d.target.id}\n${format(d.value)}`, // given d in (computed) links
     linkColor = "source-target", // source, target, source-target, or static color
-    linkStrokeOpacity = 0.5, // link stroke opacity
+    linkStrokeOpacity = 0.3, // link stroke opacity
     linkMixBlendMode = "multiply", // link blending mode
     colors = d3.schemeTableau10, // array of colors
     width = 640, // outer width, in pixels
     height = 400, // outer height, in pixels
-    marginTop = 5, // top margin, in pixels
-    marginRight = 1, // right margin, in pixels
-    marginBottom = 5, // bottom margin, in pixels
-    marginLeft = 1, // left margin, in pixels
+    marginTop = 20, // top margin, in pixels
+    marginRight = 20, // right margin, in pixels
+    marginBottom = 20, // bottom margin, in pixels
+    marginLeft = 20, // left margin, in pixels
 
 } = {}) {
     // Convert nodeAlign from a name to a function (since d3-sankey is not part of core d3).
@@ -82,6 +83,7 @@ function SankeyChart({
     let container = document.getElementById('chart2');
 
     // Compute the Sankey layout.
+    console.log(nodeAlign);
     d3Sankey.sankey()
         .nodeId(({index: i}) => N[i])
         .nodeAlign(nodeAlign)
@@ -189,21 +191,63 @@ export default {
     methods: {
         givecolor(d){
             d=d.id;
-            if (['00', '10', '11', '12', '22'].includes(d)){
+            if (['00', '11',  '22'].includes(d)){
                 return "#ebeb34"
-            } else if (['20', '21', '31', '30', 'H'].includes(d)){
+            } else if (['10', '20', '21', '31', '30', 'H'].includes(d)){
                 return "#34eb5b"
-            } else if (['01', '02', 'O'].includes(d)){
+            } else if (['01', '02', '12', 'O'].includes(d)){
                 return "#d63131"
-            } else if (['OT', 'BB'].includes(d)){
+            } else if (['OT', 'BB', '32'].includes(d)){
                 return "#a8a399"
             }
             else {
                 return "#31d6bd"
             }
         },
+        givelabel(d){
+            switch(d.id){
+                case '00':
+                    return '0-0'
+                case '11':
+                    return '1-1'
+                case '22':
+                    return '2-2'
+                case '10':
+                    return '1-0'
+                case '20':
+                    return '2-0'
+                case '21':
+                    return '2-1'
+                case '31':
+                    return '3-1'
+                case '30':
+                    return '3-0'
+                case 'H':
+                    return 'Hit'
+                case '01':
+                    return '0-1'
+                case '02':
+                    return '0-2'
+                case '12':
+                    return '1-2'
+                case 'O':
+                    return 'Out'
+                case 'OT':
+                    return 'Other'
+                case 'BB':
+                    return 'Walk'
+                case '32':
+                    return '3-2'
+            }
+
+        },
         drawSankey(){
-            SankeyChart({ links: this.myFlowData, id: "#chart2"}, { nodeGroup: this.givecolor, linkColor: "target"  });
+            SankeyChart({ links: this.myFlowData, id: "#chart2"}, 
+                { nodeGroup: this.givecolor, 
+                  nodeLabel: this.givelabel,
+                  linkColor: "source", 
+                  align: "right",
+                  nodePadding: 60});
         },
     },
 }

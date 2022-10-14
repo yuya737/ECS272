@@ -36,6 +36,7 @@ const pitch_type_name = {
     'Changeup': '#386cb0',
     'Slider': '#fdc086',
     'Splitter': '#f0027f',
+    'Other': '#bf5617'
 }
 
 let curves_bool_array;
@@ -277,14 +278,14 @@ export default {
 
             let svg = d3.select('#legend')
                 .append("svg")
-                .attr("viewBox", [0, 0, containerWidth, containerHeight])
-                .attr("width", containerWidth )
-                .attr("height", containerHeight)
+                .attr("viewBox", [0, 0, 200, 200])
+                .attr("width", 200 )
+                .attr("height", 200)
                 .style("margin", "auto")
                 .style("height", "100%");
 
             let size = 20;
-            let keys = [ '4-Seam Fastball', 'Curveball', 'Sinker', 'Changeup', 'Slider', 'Splitter'];
+            let keys = [ '4-Seam Fastball', 'Curveball', 'Sinker', 'Changeup', 'Slider', 'Splitter', 'Other'];
 
             svg.selectAll("mydots")
                 .data(keys)
@@ -377,6 +378,12 @@ export default {
             let arr = []
 
             for (let path of this.myData){
+                let color;
+                if (pitch_type[path['pitch_type']] === undefined){
+                    color = '#bf5617' 
+                } else {
+                    color = pitch_type[path['pitch_type']]
+                }
                 const p = new bezierPath({
                     parent: this.scene,
                     v1: new THREE.Vector3(
@@ -392,7 +399,7 @@ export default {
                         path['pz'] - 5,
                         50),
                     height: 1,
-                    color: pitch_type[path['pitch_type']],
+                    color: color,
                     pitch_speed: path['start_speed'],
                 });
                 arr.push(p);
@@ -453,7 +460,7 @@ export default {
             /* debugger; */
             /* boundingBox.geometry.translate( 0, 0 ,0  ) */
 
-            scene.add(boundingBox);
+            /* scene.add(boundingBox); */
             this.boundingBox = boundingBox;
             /* scene.add(boundingBox); */
 
@@ -512,7 +519,7 @@ export default {
             /*     -6,0); */
             /* this.boundingBox.geometry.boundingSphere.radius / 4 , */ 
             /* this.boundingBox.geometry.boundingSphere.radius * 1.5 ); */ 
-            camera.position.set(0, -3, 60);
+            camera.position.set(0, -3, 55);
 
 
             camera.lookAt(this.boundingBox.geometry.boundingSphere.center.x,

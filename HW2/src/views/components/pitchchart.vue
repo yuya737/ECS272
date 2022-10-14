@@ -91,9 +91,17 @@ export default {
                 .join("circle")
                 .attr("cx", d => x(d.px))
                 .attr("cy", d => y(d.pz))
-                .attr("r", 5)
+                .attr("r", 8)
                 .style("fill", d => pitch_result[d['type']]) ;
 
+            svg.selectAll("text")
+                .data(data)
+                .join("text")
+                .attr("x", d => x(d.px)+10)
+                .attr("y", d => y(d.pz)+15)
+                //.text(d=>{parseInt(d['pitch_num'])})
+                .text(d=>parseInt(d['pitch_num']))
+                //.text(parseInt(d['pitch_num']) - 1)
 
 
             // Add one dot in the legend for each name.
