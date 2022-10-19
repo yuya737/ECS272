@@ -1,10 +1,43 @@
 <template>
-    <info>Title</info>
+    <info>Progression of all ball-strike counts and current at-bat result</info>
     <div id="chart2"></div>
 </template>
 
 
 <script>
+
+const pitch_result_dict = {
+    'Groundout': 'O',
+    'Double': 'H',
+    'Single': 'H',
+    'Strikeout': 'O',
+    'Walk': 'BB',
+    'Runner Out': 'OT',
+    'Flyout': 'O',
+    'Forceout': 'O',
+    'Pop Out': 'O',
+    'Intent Walk': 'OT',
+    'Lineout': 'O',
+    'Home Run': 'H',
+    'Triple': 'H',
+    'Hit By Pitch': 'OT',
+    'Grounded Into DP': 'O',
+    'Sac Bunt': 'OT',
+    'Fielders Choice': 'O',
+    'Bunt Groundout': 'O',
+    'Field Error': 'OT',
+    'Double Play': 'O',
+    'Sac Fly': 'OT',
+    'Fielders Choice Out': 'O',
+    'Bunt Pop Out': 'O',
+    'Catcher Interference': 'OT',
+    'Strikeout - DP': 'O',
+    'Batter Interference': 'OT',
+    'Sac Fly DP': 'O',
+    'Bunt Lineout': 'O',
+    'Sacrifice Bunt DP': 'O',
+    'Triple Play': 'O'
+}
 import * as d3 from "d3";
 import * as d3Sankey from "d3-sankey"
 
@@ -14,6 +47,7 @@ import * as d3Sankey from "d3-sankey"
 function SankeyChart({
     nodes, // an iterable of node objects (typically [{id}, …]); implied by links if missing
     links, // an iterable of link objects (typically [{source, target}, …])
+    ab_path,
     id,
 
 }, {
@@ -43,9 +77,9 @@ function SankeyChart({
     colors = d3.schemeTableau10, // array of colors
     width = 640, // outer width, in pixels
     height = 400, // outer height, in pixels
-    marginTop = 20, // top margin, in pixels
+    marginTop = 0, // top margin, in pixels
     marginRight = 20, // right margin, in pixels
-    marginBottom = 20, // bottom margin, in pixels
+    marginBottom = 0, // bottom margin, in pixels
     marginLeft = 20, // left margin, in pixels
 
 } = {}) {
@@ -79,7 +113,6 @@ function SankeyChart({
     // Construct the scales.
     //const color = nodeGroup == null ? null : d3.scaleOrdinal(nodeGroups, colors);
     const color = G;
-
     let container = document.getElementById('chart2');
 
     // Compute the Sankey layout.
@@ -120,6 +153,7 @@ function SankeyChart({
         .join("rect")
         .attr("x", d => d.x0)
         .attr("y", d => d.y0)
+        .attr("opacity", d => { if (ab_path.includes(d.id)) { return 0.9 } else { return 0.2 } })
         .attr("height", d => d.y1 - d.y0)
         .attr("width", d => d.x1 - d.x0);
 
@@ -154,6 +188,7 @@ function SankeyChart({
             : linkColor === "target" ? ({target: {index: i}}) => color[i]
             : linkColor)
         .attr("stroke-width", ({width}) => Math.max(1, width))
+        .attr("stroke-opacity", d => {if (ab_path.includes(d.source.id) & (ab_path.indexOf(d.source.id) != ab_path.length-1) & (ab_path[ab_path.indexOf(d.source.id)+1] == d.target.id)) { return 0.9 } else { return 0.2 } })
         .call(Lt ? path => path.append("title").text(({index: i}) => Lt[i]) : () => {});
 
     if (Tl) svg.append("g")
@@ -179,16 +214,31 @@ function SankeyChart({
 export default {
     name: 'FlowChart',
     data() {
-        return {};
+        return {
+            ab_path: []
+        };
     },
     props: {
-        myFlowData: Object
+        myFlowData: Object,
+        myData: Object
     },
     mounted() {
-        console.log("FlowChart: Data Passed down as a Prop  ", this.myFlowData);
+        console.log("FlowChart: FlowData Passed down as a Prop  ", this.myFlowData);
+        console.log("FlowChart: Data Passed down as a Prop  ", this.myData);
+        this.ab_path = this.getcurABPath();
         this.drawSankey();
     },
     methods: {
+        getcurABPath(){
+            let path = [];
+            this.myData.forEach((e) =>{
+                let label = parseInt(e['b_count']).toString() + parseInt(e['s_count']).toString() 
+                if (!path.includes(label))
+                    path.push(label);
+            })
+            path.push(pitch_result_dict[this.myData[0]['event']])
+            return path
+        },
         givecolor(d){
             d=d.id;
             if (['00', '11',  '22'].includes(d)){
@@ -242,7 +292,7 @@ export default {
 
         },
         drawSankey(){
-            SankeyChart({ links: this.myFlowData, id: "#chart2"}, 
+            SankeyChart({ links: this.myFlowData, id: "#chart2", ab_path: this.ab_path}, 
                 { nodeGroup: this.givecolor, 
                   nodeLabel: this.givelabel,
                   linkColor: "source", 

@@ -1,4 +1,5 @@
 <template>
+    <info>Pitch paths from current at-bat and pitch speeds</info>
     <div id="legend">
         <ul id="pitch_list">
         </ul>
@@ -17,7 +18,6 @@ import { LineMaterial  } from "three/examples/jsm/lines/LineMaterial";
 import { LineGeometry  } from "three/examples/jsm/lines/LineGeometry";
 import { Line2  } from "three/examples/jsm/lines/Line2";
 import testData from "../../assets/data/test.json";
-import homeplateData from "../../assets/data/Homeplate.obj"
 import homeplateData2 from "../../assets/data/Homeplate.gltf"
 
 const pitch_type = {
@@ -199,32 +199,21 @@ export default {
         return {
             name: 'Hello',
             someLocalValues: [1, 2, 3, 4, 5],
-            /* scene: null, */
-            /* camera: null, */
-            /* boundingbox: null, */
-            /* renderer: null, */
-            /* controls: null, */
-            /* mesh: null, */
             height: 300,
             width: 300,
+            grass_texture: new THREE.TextureLoader().load( require('../../assets/textures/dirt.jpg')),
+                  
         }
     },
     props:{
         myData: Object,
     },
     mounted(){
-        /* console.log(testData); */
-        /* let localData = testData['data']; */
-        /* this.drawBarChart(localData, "#bar"); */
-        // this.drawBarChart(this.myBarchartData, "#bar")
         console.log("BarChart: Data Passed down as a Prop  ", this.myData);
         this.scene = this.setupScene();
         this.makeStrikeZone();
-        /* this.scene = new THREE.Scene(); */
-        /* this.scene = new THREE.Scene(); */
-        /* this.boundingBox = this.setupBoundingBox(); */
         this.camera = this.setupCamera();
-        this.temp();
+        this.render();
         this.path = this.getPaths();
         this.addLegend();
         this.animate();
@@ -304,71 +293,32 @@ export default {
                 .append("text")
                 .attr("x", 10 + size*1.2)
                 .attr("y", function(d,i){ return 10 + i*(size+5) + (size/2) }) // 100 is where the first dot appears. 25 is the distance between dots
-            /* .style("fill", function(d){ return pitch_type_name[d] }) */
                 .text(function(d){ return d })
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle")
 
-            /* let container = document.getElementById('pitch_list'); */
-            /* let pitch_list = [] */
-            /* this.myData.forEach(x => pitch_list.push(x['pitch_type'])) */
-            /* pitch_list = [...new Set(pitch_list)] */
-
-            /* for (const i of pitch_list){ */
-            /*     let span = document.createElement('span'); */
-            /*     let li = document.createElement('li'); */
-
-            /*     span.style.backgroundColor="#"+pitch_type[i].toString(16); */
-            /*     li.appendChild(document.createTextNode(pitch_type_name[i])); */
-
-            /*     li.appendChild(span); */
-            /*     container.appendChild(li); */
-            /* } */
-
-            /* let container = document.getElementById('legend'); */
-            /* container.innerHTML += 'sdfsf<br>sdfsf' */
-            /* let content = document.createTextNode('sdfsadfsasdf'); */
-            /* let content2 = document.createTextNode('sdfsadfsasdf'); */
-            /* container.appendChild(content); */
-            /* container.appendChild(content2); */
 
         },
-        temp(){
+        render(){
             let container = document.getElementById('scene');
             let renderer = new THREE.WebGLRenderer({antialias: true});
 
             const controls = new OrbitControls(this.camera, renderer.domElement);
-            controls.maxPolarAngle = 3*Math.PI/4;
-
-            /* renderer.setSize(Math.min(container.clientWidth, container.clientHeight), Math.min(container.clientWidth, container.clientHeight)); */
+            controls.maxPolarAngle = 5.3*Math.PI/10;
             renderer.setSize(container.clientWidth, container.clientHeight);
             this.camera.aspect = container.clientWidth / container.clientHeight;
             this.camera.updateProjectionMatrix();
             renderer.setPixelRatio(window.devicePixelRatio);
 
             this.renderer = renderer;
-            /* this.controls = controls; */
-
-            /* let geometry = new THREE.BoxGeometry(1,1,1); */
-            /* const material = new THREE.MeshNormalMaterial(); */
-
-            /* this.mesh = new THREE.Mesh(geometry, material) */ 
-            /* this.scene.add(this.mesh); */
             container.appendChild(this.renderer.domElement);
 
             this.renderer.render(this.scene, this.camera);
 
         }, // while
         animate() {
-            /* for (const p of this.path){ */
-            /*     p['animate']() */
-            /* } */
 
             requestAnimationFrame(this.animate);
-            /* this.randomPath.animate(); */
-
-            /* this.mesh.rotation.x += 0.01 */
-            /* this.mesh.rotation.y += 0.01 */
 
             this.renderer.render(this.scene, this.camera);
         },
@@ -407,35 +357,6 @@ export default {
             }
             return arr;
         },
-
-        /* getRandomPath(){ */
-
-        /*     const getRandom = () => d3.interpolate(-1*this.gridHelperSize/2, this.gridHelperSize/2)(Math.random()); */ 
-        /*     const sceneHeight = 1; */
-
-        /*     const path = new bezierPath({ parent: this.scene, */ 
-        /*         v1: new THREE.Vector3(getRandom(), 0, getRandom() ), */ 
-        /*         v2: new THREE.Vector3(getRandom(), 0, getRandom() ), */ 
-        /*         v3: new THREE.Vector3(getRandom(), 0, getRandom() ), */ 
-        /*         height: d3.interpolate(sceneHeight * 2, sceneHeight * 4)(Math.random()), */ 
-        /*         color: d3.interpolateRainbow(Math.random()) */
-        /*     }); */ 
-        /*     const path2 = new bezierPath({ parent: this.scene, */ 
-        /*         v1: new THREE.Vector3(getRandom(), 0, getRandom() ), */ 
-        /*         v2: new THREE.Vector3(getRandom(), 0, getRandom() ), */ 
-        /*         v3: new THREE.Vector3(getRandom(), 0, getRandom() ), */ 
-        /*         height: d3.interpolate(sceneHeight * 2, sceneHeight * 4)(Math.random()), */ 
-        /*         color: d3.interpolateRainbow(Math.random()) */
-        /*     }); */ 
-        /*     console.log(path); */
-
-        /*     path['animate'](); */
-        /*     path2['animate'](); */
-
-        /*     return path; */
-
-        /* }, // getRandomPath */
-
         setupScene() {
             /* const gridHelperSize = 10; */
             const gridHelperSize = 50;
@@ -446,49 +367,30 @@ export default {
 
             const sceneHeight = 1;
             //Cube is used temporarily to set size of boundingBox       
-            /* const geometry = new THREE.BoxGeometry(1, sceneHeight, 1); */
             const geometry = new THREE.BoxGeometry(10, 10, 100);
-            /* geometry.translate(0, sceneHeight / 2, 0); */
             const cube =  new THREE.Mesh(geometry, new THREE.MeshBasicMaterial()); 
 
             scene.add(cube);
-            /* scene.add(cube); */
 
             const boundingBox = new THREE.BoxHelper(scene, 0x000000);
             boundingBox.geometry.computeBoundingBox();  
             boundingBox.geometry.computeBoundingSphere();
-            /* debugger; */
-            /* boundingBox.geometry.translate( 0, 0 ,0  ) */
 
-            /* scene.add(boundingBox); */
             this.boundingBox = boundingBox;
-            /* scene.add(boundingBox); */
 
             scene.remove(cube);
-            /* scene.remove(cube); */
             const helper = new THREE.GridHelper( this.gridHelperSize, 10 );
-            /* helper.translate(0, -2, 0); */
-            /* scene.add(helper); */
-            /* helper.scale.addScaledVector(5,1); */
 
             const geometry_plane = new THREE.PlaneGeometry( 1000, 1000 );
-            /* debugger; */
-            /* debugger; */
-            const material_plane = new THREE.MeshBasicMaterial( {color: 0xb38650, side: THREE.DoubleSide, transparent: true, opacity: 0.5}  );
+            this.grass_texture.wrapS = THREE.RepeatWrapping; 
+            this.grass_texture.wrapT = THREE.RepeatWrapping;
+            this.grass_texture.repeat.set(100,100);
+            const material_plane = new THREE.MeshBasicMaterial({ map: this.grass_texture, side: THREE.DoubleSide, transparent: true, opacity: 0.9});
+            /* const material_plane = new THREE.MeshBasicMaterial( {color: 0xb38650, side: THREE.DoubleSide, transparent: true, opacity: 0.5}  ); */
             const plane = new THREE.Mesh( geometry_plane, material_plane  );
-            /* const plane = new THREE.Plane( new THREE.Vector3( 0, 1, 0  ), 7  ); */
-            /* const plane_helper = new THREE.PlaneHelper( plane, 1000, new THREE.Color( 0xb38650  )   ); */
             plane.rotation.x = Math.PI / 2;
             plane.position.y = -7;
-            /* scene.add( plane_helper  ); */
             scene.add( plane  );
-
-            /* const loader = new OBJLoader(); */
-
-            /* loader.load(homeplateData, */ 
-            /*     (o)=>scene.add(o), */
-            /*     (xhr)=>console.log((xhr.loaded / xhr.total) * 100+'% loaded'), */
-            /*     (e) => console.log(e)); */
 
             const loader2 = new GLTFLoader();
 
@@ -497,16 +399,11 @@ export default {
                 (xhr)=>console.log((xhr.loaded / xhr.total) * 100+'% loaded'),
                 (e) => console.log(e));
 
-            /* let homeplate = loader.parse(homeplateData); */
-
-
             return scene;  
         },
 
         setupCamera() {
             const fov = 45;
-            /* const width = 500; */
-            /* const height = 300; */
             const aspect = this.width / this.height;
 
             const near = 3;
@@ -515,15 +412,10 @@ export default {
             const camera = new THREE.PerspectiveCamera(75, 1., near, far);
 
             // Position for a bird's eye view of the warehouse
-            /* camera.position.set(-1 * this.boundingBox.geometry.boundingSphere.radius * 0.75, */ 
-            /*     -6,0); */
-            /* this.boundingBox.geometry.boundingSphere.radius / 4 , */ 
-            /* this.boundingBox.geometry.boundingSphere.radius * 1.5 ); */ 
             camera.position.set(0, -3, 55);
 
 
             camera.lookAt(this.boundingBox.geometry.boundingSphere.center.x,
-                /* this.boundingBox.geometry.boundingSphere.center.y, */
                 -7,
                 this.boundingBox.geometry.boundingSphere.center.z);    
 

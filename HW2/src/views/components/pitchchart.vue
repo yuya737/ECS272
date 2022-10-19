@@ -1,4 +1,7 @@
 <template>
+    <info>Pitch final location from catcher's perspective and results from AB id - {{ getABid() }}</info>
+    <div id="legend2">
+    </div>
     <div id="chart"></div>
 </template>
 
@@ -32,8 +35,11 @@ export default {
         this.drawPitchChart(this.myData, "#chart");
     },
     methods: {
+        getABid(){
+            return parseInt(this.myData[0]['ab_id'])
+        },
         drawPitchChart(data, id){
-            const margin = {top: 20, right: 20, bottom: 20, left: 20};
+            const margin = {top: 60, right: 60, bottom: 60, left: 60};
             let container = document.getElementById('chart');
 
             let containerWidth = Math.min(container.clientWidth, container.clientHeight);
@@ -99,37 +105,75 @@ export default {
                 .join("text")
                 .attr("x", d => x(d.px)+10)
                 .attr("y", d => y(d.pz)+15)
-                //.text(d=>{parseInt(d['pitch_num'])})
                 .text(d=>parseInt(d['pitch_num']))
-                //.text(parseInt(d['pitch_num']) - 1)
 
 
             // Add one dot in the legend for each name.
             let size = 20;
-            let keys = ['Strike', 'Ball', 'In Play']
+            let keys = ['Strike', 'Ball', 'In Play'];
 
-            svg.selectAll("mydots")
+            let svg2 = d3.select('#legend2')
+                .append("svg")
+                .attr("viewBox", [0, 0, 200, 200])
+                .attr("width", 200 )
+                .attr("height", 200)
+                .style("margin", "auto")
+                .style("height", "100%");
+
+            svg2.selectAll("mydots")
                 .data(keys)
                 .enter()
                 .append("rect")
                 .attr("x", 10)
-                .attr("y", function(d,i){ return 10 + i*(size+5) }) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("y", function(d,i){ return 0 + i*(size+5) }) // 100 is where the first dot appears. 25 is the distance between dots
                 .attr("width", size)
                 .attr("height", size)
                 .style("fill", d => pitch_label[d]);
 
             // Add one dot in the legend for each name.
-            svg.selectAll("mylabels")
+            svg2.selectAll("mylabels")
                 .data(keys)
                 .enter()
                 .append("text")
                 .attr("x", 10 + size*1.2)
-                .attr("y", function(d,i){ return 10 + i*(size+5) + (size/2) }) // 100 is where the first dot appears. 25 is the distance between dots
+                .attr("y", function(d,i){ return 0 + i*(size+5) + (size/2) }) // 100 is where the first dot appears. 25 is the distance between dots
                 .style("fill", function(d){ return pitch_label[d] })
                 .text(function(d){ return d })
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle")
 
+            const x_axis = g => g
+                .attr("transform", `translate(0, ${containerHeight - margin.bottom})`)
+                .call(d3.axisBottom(x))
+
+            const y_axis = g => g
+                .attr("transform", `translate(${margin.left}, 0)`)
+                .call(d3.axisLeft(y))
+
+            svg.append("g")
+                .call(x_axis)
+                .call( g=>g.select(".tick:last-of-type text")
+                    .clone()
+                    .attr("text-anchor", "middle")
+                    .attr("x", -(containerWidth - margin.left - margin.right) / 2)
+                    .attr("y", margin.bottom + 10)
+                    .attr("font-weight", "bold")
+                    .style("font-size",11)
+                    .text("Pitch final location the across the plate horizontally (variable: px). 0 signifies the middle of the homeplate. In feet.")
+                );
+
+            svg.append("g")
+                .call(y_axis)
+                .call( g=>g.select(".tick:last-of-type text")
+                    .clone()
+                    .attr("transform", `rotate(-90)`)
+                    .attr("text-anchor", "middle")
+                    .attr("x", -containerHeight/2 + 70)
+                    .attr("y", -40)
+                    .attr("font-weight", "bold")
+                    .style("font-size",11)
+                    .text("Pitch final location the across the plate vertically (variable: pz). -2 signifies ground level. In feet.")
+                );
 
         }
     }

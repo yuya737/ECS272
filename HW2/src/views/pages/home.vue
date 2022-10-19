@@ -13,7 +13,7 @@
                     </a-row>
                     <a-row :span="10" :style="{ height: '50%', width: '100%' }">
                         <a-col :style="{ width: '100%' }">
-                            <FlowChart v-if="flowDataExists" :myFlowData="myFlowData" />
+                            <FlowChart v-if="flowDataExists && dataExists" :myFlowData="myFlowData"  :myData="myData" :key="componentKey"/>
                         </a-col>
                     </a-row>
                 </a-col>
@@ -26,12 +26,8 @@ import BarChart from "../components/barchart.vue"
 import PitchChart from "../components/pitchchart.vue"
 import FlowChart from "../components/flow.vue"
 import * as d3 from "d3";
-/* import csvPath from '../../assets/data/SF_Historical_Ballot_Measures.csv'; */
-/* import csvPath from '../../assets/data/test.csv'; */
 import csvPath from '../../assets/data/ab150_subset.csv';
-/* import csvPath2 from '../../assets/data/pitch_flow.csv'; */
 import csvPath2 from '../../assets/data/pitch_flow_2.csv';
-/* import csvPath from './test.csv'; */
 
 export default {
     data(){
