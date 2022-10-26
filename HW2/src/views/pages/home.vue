@@ -3,17 +3,17 @@
         <a-row :style="{ height: '100%' }">
                 <a-col :span="10" :style="{ height: '100%' }" >
                             <button @click="getRandomAB">Get New at-bat</button>
-                            <PitchChart v-if="dataExists" :myData="myData" :key="componentKey" />
+                            <PitchChart v-if="dataExists" :myData="myData" :key="componentKey_pitch" @selected="getSelected"/>
                 </a-col>
                 <a-col :span="14" :style="{ height: '100%' }">
                     <a-row :span="14" :style="{ height: '50%', width: '100%' }"> 
                         <a-col :style="{ width: '100%' }">
-                            <BarChart v-if="dataExists" :myData="myData" :key="componentKey"/>
+                            <BarChart v-if="dataExists" :myRenderData="myRenderData" :key="componentKey_render"/>
                         </a-col>
                     </a-row>
                     <a-row :span="10" :style="{ height: '50%', width: '100%' }">
                         <a-col :style="{ width: '100%' }">
-                            <FlowChart v-if="flowDataExists && dataExists" :myFlowData="myFlowData"  :myData="myData" :key="componentKey"/>
+                            <HeatChart v-if="heatDataExists" :selectedPitchType_prop="selectedPitchType_prop" :myHeatData="myHeatData" :key="componentKey_heat"/>
                         </a-col>
                     </a-row>
                 </a-col>
@@ -25,9 +25,13 @@
 import BarChart from "../components/barchart.vue"
 import PitchChart from "../components/pitchchart.vue"
 import FlowChart from "../components/flow.vue"
+import HeatChart from "../components/pitchheat.vue"
 import * as d3 from "d3";
 import csvPath from '../../assets/data/ab150_subset.csv';
 import csvPath2 from '../../assets/data/pitch_flow_2.csv';
+import csvPath3 from '../../assets/data/ab50000_subset.csv';
+
+//<FlowChart v-if="flowDataExists && dataExists" :myFlowData="myFlowData"  :myData="myData" :key="componentKey_flow"/>
 
 export default {
     data(){
@@ -37,20 +41,29 @@ export default {
             cur_at_bat: null,
             dataExists: false,
             flowDataExists: false,
+            heatDataExists: false,
+            selectedPitchType_prop: "FF",
             myData: [],
+            myRenderData: [],
             myFlowData: [],
-            componentKey: 0,
+            myHeatData: [],
+            componentKey_pitch: 0,
+            componentKey_render: 0,
+            componentKey_flow: 0,
+            componentKey_heat: 0,
         }
     },
     components: {
         BarChart,
         PitchChart,
         FlowChart,
+        HeatChart,
     },
     created(){
         /* Fetch via CSV */
         this.getDataFromCsv();
         this.getDataFromCsv2();
+        this.getDataFromCsv3();
     },
     mounted(){
         /* d3.csv(csvPath, e => this.myData = e); */
@@ -58,17 +71,20 @@ export default {
 
     },
     methods: {
-        forceRerender() {
-            this.componentKey += 1;
-        },
-        getABSequence(){
-
+        getSelected(selected){
+            this.myData_backup = this.myData;
+            this.myRenderData = this.myData.filter(x => x[""] == selected)
+            this.selectedPitchType_prop = this.myRenderData[0]['pitch_type']
+            this.componentKey_render += 1;
         },
         getRandomAB(){
             let newAB = this.at_bat_list[Math.floor(Math.random()*this.at_bat_list.length)];
             this.cur_at_bat = newAB;
             this.myData = this.data.filter(x => x['ab_id'] === this.cur_at_bat)
-            this.forceRerender();
+            this.myRenderData = this.myData
+            this.componentKey_pitch += 1;
+            this.componentKey_render += 1;
+            this.componentKey_flow += 1;
             /* myData = */ 
         },
         getDataFromCsv(){
@@ -88,6 +104,7 @@ export default {
                 // For now select the first
                 this.cur_at_bat = this.at_bat_list[0];
                 this.myData = data.filter(x => x['ab_id'] === this.cur_at_bat)
+                this.myRenderData = this.myData
                 /* data.forEach(function(x) {debugger; if (!this.at_bat_list.includes(x['ab_id'])) { at_bat_list.push(x['ab_id']); }}) */
             });
         },
@@ -101,6 +118,14 @@ export default {
                 console.log('sdfsdf', data)
                 this.myFlowData = data;
 
+            });
+        },
+        getDataFromCsv3(){
+            //async method
+            console.log(csvPath3)
+            d3.csv(csvPath3).then((data) => {
+                this.heatDataExists = true; // updates the v-if to conditionally show the barchart only if our data is here.
+                this.myHeatData = data;
             });
         },
     }

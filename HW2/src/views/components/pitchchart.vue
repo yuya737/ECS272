@@ -25,7 +25,9 @@ const pitch_label = {
 export default {
     name: 'PitchChart',
     data() {
-        return {};
+        return {
+            selected: []
+        };
     },
     props: {
         myData: Object
@@ -33,8 +35,13 @@ export default {
     mounted() {
         console.log("pitchart: Data Passed down as a Prop  ", this.myData);
         this.drawPitchChart(this.myData, "#chart");
+        //this.$emit('selected', [0]);
     },
     methods: {
+        selectedSubset(target){
+            this.$emit('selected', target);
+        },
+
         getABid(){
             return parseInt(this.myData[0]['ab_id'])
         },
@@ -98,7 +105,14 @@ export default {
                 .attr("cx", d => x(d.px))
                 .attr("cy", d => y(d.pz))
                 .attr("r", 8)
-                .style("fill", d => pitch_result[d['type']]) ;
+                .style("fill", d => pitch_result[d['type']])
+                .on('click', (e) => {
+                    this.selectedSubset(e.currentTarget.__data__[""])
+                    d3.selectAll("circle").style("opacity", 0.3);
+                    d3.select(e.target).style("opacity", 1);
+                });
+
+                
 
             svg.selectAll("text")
                 .data(data)
@@ -137,7 +151,6 @@ export default {
                 .append("text")
                 .attr("x", 10 + size*1.2)
                 .attr("y", function(d,i){ return 0 + i*(size+5) + (size/2) }) // 100 is where the first dot appears. 25 is the distance between dots
-                .style("fill", function(d){ return pitch_label[d] })
                 .text(function(d){ return d })
                 .attr("text-anchor", "left")
                 .style("alignment-baseline", "middle")

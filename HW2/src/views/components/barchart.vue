@@ -55,11 +55,13 @@ class bezierPath {
             height,
             pitch_speed,
             color = 0xffffff,
+            id,
         } = config;
 
         //https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame
         this.frameRate = frameRate;       
         this.pitch_speed = pitch_speed;
+        this.id = id
 
         this.parent = parent;
         this.curveGroup = new THREE.Group();
@@ -113,6 +115,7 @@ class bezierPath {
         let start, original_start;
         let currentSegment = this.currentSegment;
         let curveGroup = this.curveGroup;
+        let id = this.id;
         const framRate = this.frameRate;
         const pitch_speed = this.pitch_speed;
         const parent = this.parent;
@@ -191,7 +194,7 @@ class bezierPath {
 
 }      
 
-let scene, mesh;
+//let scene, mesh;
 
 export default {
     name: 'BarChart',
@@ -202,14 +205,14 @@ export default {
             height: 300,
             width: 300,
             grass_texture: new THREE.TextureLoader().load( require('../../assets/textures/dirt.jpg')),
-                  
+            selected: []
         }
     },
     props:{
-        myData: Object,
+        myRenderData: Object,
     },
     mounted(){
-        console.log("BarChart: Data Passed down as a Prop  ", this.myData);
+        console.log("BarChart: Data Passed down as a Prop  ", this.myRenderData);
         this.scene = this.setupScene();
         this.makeStrikeZone();
         this.camera = this.setupCamera();
@@ -223,8 +226,8 @@ export default {
             // Strike zone 
             let top = [], bot = [];
 
-            this.myData.forEach(x => top.push(x['sz_top']));
-            this.myData.forEach(x => bot.push(x['sz_bot']));
+            this.myRenderData.forEach(x => top.push(x['sz_top']));
+            this.myRenderData.forEach(x => bot.push(x['sz_bot']));
 
             top = top.reduce((a,b) => parseFloat(a) + parseFloat(b)) / top.length;
             bot = bot.reduce((a,b) => parseFloat(a) + parseFloat(b)) / bot.length;
@@ -327,7 +330,7 @@ export default {
         getPaths(){
             let arr = []
 
-            for (let path of this.myData){
+            for (let path of this.myRenderData){
                 let color;
                 if (pitch_type[path['pitch_type']] === undefined){
                     color = '#bf5617' 
@@ -351,6 +354,7 @@ export default {
                     height: 1,
                     color: color,
                     pitch_speed: path['start_speed'],
+                    id: path[""]
                 });
                 arr.push(p);
                 p['animate']();
