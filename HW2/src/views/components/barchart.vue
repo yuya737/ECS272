@@ -20,24 +20,8 @@ import { Line2  } from "three/examples/jsm/lines/Line2";
 import testData from "../../assets/data/test.json";
 import homeplateData2 from "../../assets/data/Homeplate.gltf"
 
-const pitch_type = {
-    'FF': 0x7fc97f,
-    'CU': 0xbeaed4,
-    'SI': 0xffff99,
-    'CH': 0x386cb0,
-    'SL': 0xfdc086,
-    'FS': 0xf0027f
-}
+import { pitch_type_color, pitch_type_label_color  } from './constants.js'
 
-const pitch_type_name = {
-    '4-Seam Fastball': '#7fc97f',
-    'Curveball': '#beaed4',
-    'Sinker': '#ffff99',
-    'Changeup': '#386cb0',
-    'Slider': '#fdc086',
-    'Splitter': '#f0027f',
-    'Other': '#bf5617'
-}
 
 let curves_bool_array;
 
@@ -287,7 +271,7 @@ export default {
                 .attr("y", function(d,i){ return 10 + i*(size+5) }) // 100 is where the first dot appears. 25 is the distance between dots
                 .attr("width", size)
                 .attr("height", size)
-                .style("fill", d => pitch_type_name[d]);
+                .style("fill", d => pitch_type_label_color[d]);
 
             // Add one dot in the legend for each name.
             svg.selectAll("mylabels")
@@ -332,10 +316,10 @@ export default {
 
             for (let path of this.myRenderData){
                 let color;
-                if (pitch_type[path['pitch_type']] === undefined){
+                if (pitch_type_color[path['pitch_type']] === undefined){
                     color = '#bf5617' 
                 } else {
-                    color = pitch_type[path['pitch_type']]
+                    color = pitch_type_color[path['pitch_type']]
                 }
                 const p = new bezierPath({
                     parent: this.scene,

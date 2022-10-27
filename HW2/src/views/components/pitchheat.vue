@@ -1,43 +1,12 @@
 <template>
-    <info>Progression of all ball-strike counts and current at-bat result</info>
+    <info>Effective pitch locations for {{ getPitchType() }}s against {{ getBatterSide() }}-handed batters</info>
     <div id="chart3"></div>
 </template>
 
 
 <script>
 
-const pitch_result_dict = {
-    'Groundout': 'O',
-    'Double': 'H',
-    'Single': 'H',
-    'Strikeout': 'O',
-    'Walk': 'BB',
-    'Runner Out': 'OT',
-    'Flyout': 'O',
-    'Forceout': 'O',
-    'Pop Out': 'O',
-    'Intent Walk': 'OT',
-    'Lineout': 'O',
-    'Home Run': 'H',
-    'Triple': 'H',
-    'Hit By Pitch': 'OT',
-    'Grounded Into DP': 'O',
-    'Sac Bunt': 'OT',
-    'Fielders Choice': 'O',
-    'Bunt Groundout': 'O',
-    'Field Error': 'OT',
-    'Double Play': 'O',
-    'Sac Fly': 'OT',
-    'Fielders Choice Out': 'O',
-    'Bunt Pop Out': 'O',
-    'Catcher Interference': 'OT',
-    'Strikeout - DP': 'O',
-    'Batter Interference': 'OT',
-    'Sac Fly DP': 'O',
-    'Bunt Lineout': 'O',
-    'Sacrifice Bunt DP': 'O',
-    'Triple Play': 'O'
-}
+import { pitch_type_dict  } from './constants.js'
 import * as d3 from "d3";
 
 export default {
@@ -46,26 +15,40 @@ export default {
         return {
             ab_path: [],
             data: [],
-            selectedPitchType: "FF"
+            selectedPitchType: null,
+            batterSide: null
         };
     },
     props: {
         myHeatData: Object,
-        selectedPitchType_prop: String
+        selectedPitch: Object
     },
     mounted() {
         console.log("HeatChart: Data Passed down as a Prop  ", this.myHeatData);
+        this.selectedPitchType = this.selectedPitch['pitch_type']
+        this.batterSide = this.selectedPitch['stand']
         this.draw();
     },
     watch:{
-        selectedPitchType_prop(newVal, oldVal){
-            this.selectedPitchType = newVal;
-            d3.select('#heat').remove();
-            //x._groups[0].forEach( x => x.remove() );
-            this.draw();
+        selectedPitch(newVal, oldVal){
+            // Need to update
+            if (this.selectedPitchType && (this.selectedPitchType !== newVal['pitch_type'])){
+                this.selectedPitchType = newVal['pitch_type'];
+
+                this.batterSide = newVal['stand']
+                d3.select('#heat').remove();
+                //x._groups[0].forEach( x => x.remove() );
+                this.draw();
+            }
         }
     },
     methods: {
+        getBatterSide(){
+            return this.batterSide == 'L' ? 'Left' : 'Right';
+        },
+        getPitchType(){
+            return pitch_type_dict[this.selectedPitchType];
+        },
         draw(){
 
             const margin = {top: 60, right: 60, bottom: 60, left: 60};
@@ -91,7 +74,8 @@ export default {
                 .style("margin", "auto")
                 .style("height", "100%");
 
-            this.data = this.myHeatData.filter(x => (x["pitch_type"] === this.selectedPitchType) && (x["code"] == 'C' || x["code"] == 'S'))
+            //this.data = this.myHeatData.filter(x => (x['stand'] === this.batterSide) && (x["pitch_type"] === this.selectedPitchType) && (x["code"] == 'C' || x["code"] == 'S'))
+            this.data = this.myHeatData.filter(x => (x['stand'] === this.batterSide) && (x["pitch_type"] === this.selectedPitchType) && (x["type"] == 'S'))
             // compute the density data
 
             let densityData = d3.contourDensity()
@@ -99,7 +83,7 @@ export default {
                 .y(function(d) { return y(d['pz']);  })
                 .weight((d) => (100 / this.data.length) )
                 .size([containerWidth, containerHeight])
-                .bandwidth(6)
+                .bandwidth(15)
                 (this.data)
 
             // Prepare a color palette
@@ -116,9 +100,8 @@ export default {
             this.data.forEach(x => top.push(x['sz_top']));
             this.data.forEach(x => bot.push(x['sz_bot']));
 
-            top = top.reduce((a,b) => parseFloat(a) + parseFloat(b)) / top.length;
-            bot = bot.reduce((a,b) => parseFloat(a) + parseFloat(b)) / bot.length;
-            console.log(top,bot)
+            top = top.reduce((a,b) => parseFloat(a) + parseFloat(b), 0) / top.length;
+            bot = bot.reduce((a,b) => parseFloat(a) + parseFloat(b), 0) / bot.length;
 
 
             svg.selectAll("rect")

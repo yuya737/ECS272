@@ -6,38 +6,7 @@
 
 <script>
 
-const pitch_result_dict = {
-    'Groundout': 'O',
-    'Double': 'H',
-    'Single': 'H',
-    'Strikeout': 'O',
-    'Walk': 'BB',
-    'Runner Out': 'OT',
-    'Flyout': 'O',
-    'Forceout': 'O',
-    'Pop Out': 'O',
-    'Intent Walk': 'OT',
-    'Lineout': 'O',
-    'Home Run': 'H',
-    'Triple': 'H',
-    'Hit By Pitch': 'OT',
-    'Grounded Into DP': 'O',
-    'Sac Bunt': 'OT',
-    'Fielders Choice': 'O',
-    'Bunt Groundout': 'O',
-    'Field Error': 'OT',
-    'Double Play': 'O',
-    'Sac Fly': 'OT',
-    'Fielders Choice Out': 'O',
-    'Bunt Pop Out': 'O',
-    'Catcher Interference': 'OT',
-    'Strikeout - DP': 'O',
-    'Batter Interference': 'OT',
-    'Sac Fly DP': 'O',
-    'Bunt Lineout': 'O',
-    'Sacrifice Bunt DP': 'O',
-    'Triple Play': 'O'
-}
+import { pitch_result_dict  } from './constants.js'
 import * as d3 from "d3";
 import * as d3Sankey from "d3-sankey"
 

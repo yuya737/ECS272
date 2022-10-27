@@ -2,8 +2,9 @@
     <body>
         <a-row :style="{ height: '100%' }">
                 <a-col :span="10" :style="{ height: '100%' }" >
-                            <button @click="getRandomAB">Get New at-bat</button>
-                            <PitchChart v-if="dataExists" :myData="myData" :key="componentKey_pitch" @selected="getSelected"/>
+                            <button @click="getRandomAB(); ">Get New at-bat</button>
+                            <button v-if="selectedPitch" @click="reset(); $refs.PC.resetOpacity();">Clear selection</button>
+                            <PitchChart ref="PC" v-if="dataExists" :myData="myData" :key="componentKey_pitch" @selected="getSelected"/>
                 </a-col>
                 <a-col :span="14" :style="{ height: '100%' }">
                     <a-row :span="14" :style="{ height: '50%', width: '100%' }"> 
@@ -13,7 +14,8 @@
                     </a-row>
                     <a-row :span="10" :style="{ height: '50%', width: '100%' }">
                         <a-col :style="{ width: '100%' }">
-                            <HeatChart v-if="heatDataExists" :selectedPitchType_prop="selectedPitchType_prop" :myHeatData="myHeatData" :key="componentKey_heat"/>
+                            <HeatChart v-if="heatDataExists && showHeat" :selectedPitch="selectedPitch" :myHeatData="myHeatData" :key="componentKey_heat"/>
+                            <FlowChart v-if="flowDataExists && dataExists && !showHeat" :myFlowData="myFlowData"  :myData="myData" :key="componentKey_flow"/>
                         </a-col>
                     </a-row>
                 </a-col>
@@ -42,7 +44,8 @@ export default {
             dataExists: false,
             flowDataExists: false,
             heatDataExists: false,
-            selectedPitchType_prop: "FF",
+            showHeat: false,
+            selectedPitch: null,
             myData: [],
             myRenderData: [],
             myFlowData: [],
@@ -71,11 +74,19 @@ export default {
 
     },
     methods: {
+        reset(){
+            this.selectedPitch = null;
+            this.myRenderData = this.myData;
+            this.componentKey_render += 1;
+            this.showHeat = false;
+        },
         getSelected(selected){
             this.myData_backup = this.myData;
             this.myRenderData = this.myData.filter(x => x[""] == selected)
-            this.selectedPitchType_prop = this.myRenderData[0]['pitch_type']
+            this.selectedPitch = this.myRenderData[0]
+            /* this.selectedPitchType_prop = this.myRenderData[0]['pitch_type'] */
             this.componentKey_render += 1;
+            this.showHeat = true;
         },
         getRandomAB(){
             let newAB = this.at_bat_list[Math.floor(Math.random()*this.at_bat_list.length)];
@@ -85,7 +96,7 @@ export default {
             this.componentKey_pitch += 1;
             this.componentKey_render += 1;
             this.componentKey_flow += 1;
-            /* myData = */ 
+            this.showHeat = false;
         },
         getDataFromCsv(){
             //async method

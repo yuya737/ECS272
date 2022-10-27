@@ -9,24 +9,12 @@
 <script>
 import * as d3 from "d3";
 
-const pitch_result = {
-    'S': '#e41a1c',
-    'B': '#4daf4a',
-    'X': '#377eb8',
-};
-
-const pitch_label = {
-    'Strike': '#e41a1c',
-    'Ball': '#4daf4a',
-    'In Play': '#377eb8',
-};
-
+import { pitch_result_color, pitch_label_color  } from './constants.js'
 
 export default {
     name: 'PitchChart',
     data() {
         return {
-            selected: []
         };
     },
     props: {
@@ -41,7 +29,9 @@ export default {
         selectedSubset(target){
             this.$emit('selected', target);
         },
-
+        resetOpacity(){
+            d3.selectAll("circle").style("opacity", 1);
+        },
         getABid(){
             return parseInt(this.myData[0]['ab_id'])
         },
@@ -105,7 +95,7 @@ export default {
                 .attr("cx", d => x(d.px))
                 .attr("cy", d => y(d.pz))
                 .attr("r", 8)
-                .style("fill", d => pitch_result[d['type']])
+                .style("fill", d => pitch_result_color[d['type']])
                 .on('click', (e) => {
                     this.selectedSubset(e.currentTarget.__data__[""])
                     d3.selectAll("circle").style("opacity", 0.3);
@@ -142,7 +132,7 @@ export default {
                 .attr("y", function(d,i){ return 0 + i*(size+5) }) // 100 is where the first dot appears. 25 is the distance between dots
                 .attr("width", size)
                 .attr("height", size)
-                .style("fill", d => pitch_label[d]);
+                .style("fill", d => pitch_label_color[d]);
 
             // Add one dot in the legend for each name.
             svg2.selectAll("mylabels")
